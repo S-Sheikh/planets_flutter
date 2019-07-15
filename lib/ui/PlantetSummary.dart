@@ -3,11 +3,15 @@ import 'package:planet_flutter/model/planet.dart';
 import 'package:planet_flutter/style/styles.dart';
 import 'package:planet_flutter/ui/DetailPage.dart';
 
-class PlanetRow extends StatelessWidget {
+class PlanetSummary extends StatelessWidget {
   //planet object that is passed to the row
 
   final Planet planet;
-  PlanetRow(this.planet);
+  final bool horizontal;
+
+  PlanetSummary(this.planet,{this.horizontal = true});
+  
+  PlanetSummary.vertical(this.planet): horizontal =false;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +19,7 @@ class PlanetRow extends StatelessWidget {
     margin: new EdgeInsets.symmetric(
       vertical: 16.0,
     ),
-    alignment: FractionalOffset.centerLeft ,
+    alignment:  horizontal ? FractionalOffset.centerLeft :FractionalOffset.center,
     child: new Hero(
         tag: "planet-hero-${planet.id}",
         child: new Image(
@@ -30,7 +34,13 @@ class PlanetRow extends StatelessWidget {
         new BoxShadow(
           color: Colors.black38,
           blurRadius: 3.0,
-          offset: Offset(-100.0, 0.0)
+          offset: Offset(horizontal ? -100.0 : 0,horizontal ? 0.0 : -5.0),
+        ),
+        new AnimatedContainer(
+          duration: 100,
+          child: new BoxShadow(
+
+          ),
         )
       ]
     ),
@@ -48,31 +58,33 @@ class PlanetRow extends StatelessWidget {
     }
 
   final planetCardContent = new Container(
-    margin: new EdgeInsets.fromLTRB(116.0, 16.0, 16.0, 16.0),
+    margin: new EdgeInsets.fromLTRB(horizontal?100.0:16.0, horizontal ? 16.0 : 42.0, 16.0, 16.0),
     constraints: new BoxConstraints.expand(),
     child: new Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: horizontal ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: <Widget>[
-        new Container(height: 4.0,),
+        new Container(height: 4.0,width: 8.0,),
         new Text(planet.name
         ,style:Styles.subHeaderTextStyle,),
         new Container(height: 5.0,),
         new Text(planet.location,style:Styles.subHeaderTextStyle),
         new Container(
           margin: new EdgeInsets.symmetric(vertical: 8.0),
-          height: 2.0,
+          height: 3.0,
           width: 18.0,
           color: new Color(0xFF00C6FF),
         ),
         new Row(
           children: <Widget>[
             new Expanded(
+              flex: horizontal ? 1 : 0,
               child: _planetValue(
                 value: planet.distance,
                 icon: Icons.location_on,
               ),
             ),
             new Expanded(
+              flex: horizontal ? 1 : 0,
               child: _planetValue(
                 value: planet.gravity,
                 icon: Icons.arrow_drop_down,
@@ -84,35 +96,9 @@ class PlanetRow extends StatelessWidget {
     ),
   );
 
-  
-
-  return new GestureDetector(
-      onTap: () => Navigator.of(context).push(new PageRouteBuilder(
-        pageBuilder: (_, __, ___) => new DetailPage(planet),
-      )),
-      child: Container(
-      height: 120.0,
-      margin: const EdgeInsets.symmetric(
-        vertical: 16.0,    
-        horizontal: 24.0,
-      ),
-      child: new Stack(
-        children: <Widget>[
-          planetCard,
-          planetThumbnail,
-          planetCardContent,
-        ],
-      ),
-    ),
-  );
-}
-  
-
   final planetCard = new Container(
-    height: 124.0,
-    margin: new EdgeInsets.only(
-      left: 46.0,
-    ),
+    height: horizontal ? 124.0 : 154.0,
+    margin: horizontal ? new EdgeInsets.only(left: 46.0) : new EdgeInsets.only(top:72.0),
     decoration: new BoxDecoration(
       gradient: new LinearGradient(     
         colors: [new Color(0xFF232366),new Color(0xFF31318C)],
@@ -132,4 +118,32 @@ class PlanetRow extends StatelessWidget {
       ]
     ),
   );
+
+  return new GestureDetector(
+      onTap: horizontal ? () => Navigator.of(context).push(new PageRouteBuilder(
+        pageBuilder: (_, __, ___) => new DetailPage(planet),
+        transitionsBuilder: (context,animation,secondaryAnimation,child)=>
+        new FadeTransition(
+          opacity: animation,
+          child: child,
+        )
+      )) : null,
+      child: Container(
+      height: 120.0,
+      margin: const EdgeInsets.symmetric(
+        vertical: 16.0,    
+        horizontal: 24.0,
+      ),
+      child: new Stack(
+        children: <Widget>[
+          planetCard,
+          planetThumbnail,
+          planetCardContent,
+        ],
+      ),
+    ),
+  );
+
+  
+  } 
 }
